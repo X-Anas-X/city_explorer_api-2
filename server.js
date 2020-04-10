@@ -63,8 +63,11 @@ function Location(city, geoData) {
   this.latitude = geoData[0].lat;
   this.longitude = geoData[0].lon;
   trailArr.push(this.latitude, this.longitude);
+  // Location.all.push(this);
+  
 
 }
+// Location.all = [];
 // console.log(trailArr);
 
 
@@ -109,32 +112,23 @@ function Weather(day) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
+
 function trailHandler (request, response){
     superagent(
-        `https://www.hikingproject.com/data/get-trails?lat=${request.query.latitude}&lon=${request.query.longitude}&maxDistance=200&sort=Distance&key=${process.env.TRAIL_API_KEY}`
-        // `https://www.hikingproject.com/data/get-trails?lat=${request.query.latitude}&lon=${request.query.longitude}&maxDistance=10&key=${process.env.TRAIL_API_KEY}`
-        
-    ).then ((trailRes) => {
-      console.log(request.query.latitude, request.query.longitude);
-      let resonseArr = [];
-        trailRes.body.trails.map((key)=>{
-          // console.log('this',key);
-          let newData = new Trails(key);
-          resonseArr.push(newData);
-          
-          
-            // return new Trails(key);
+        `https://www.hikingproject.com/data/get-trails?lat=${request.query.latitude}&lon=${request.query.longitude}&maxDistance=400&key=${process.env.TRAIL_API_KEY}`)
+        .then ((trailRes) => {
+      // console.log(request.query.latitude, request.query.longitude);
+      
+        const trailSummery=trailRes.body.trails.map((trailInfo)=>{
+          // console.log('this',key); 
+  
+            return new Trails(trailInfo);                 
         });
         // getTrails(key,lat,lon)
-        // .then(allTrails => res.status(200).json(allTrails));
+        // .then(allTrails => res.status(200).json(trailSummery));
         // console.log('here console', trailSummery);
-        response.status(200).json(newData);
-
-
+        response.status(200).json(trailSummery);
     })
-
-   
-    
     .catch((err) => errorHandler(err, request, response));
 }
 function Trails(trailInfo){
@@ -142,24 +136,20 @@ function Trails(trailInfo){
     this.location = trailInfo.location;
     this.length = trailInfo.length;
     this.stars = trailInfo.stars;
-    this.star_votes = trailInfo.star_votes;
+    this.star_votes = trailInfo.starVotes;
     this.summary = trailInfo.summary;
-    this.trail_url = trailInfo.trail_url;
-    this.conditions = trailInfo.conditions;
-    this.condition_date = trailInfo.condition_date.toString().slice(0, 10);
-    this.condition_time = trailInfo.condition_time.toString().slice(12, 19);
-
+    this.trail_url = trailInfo.url;
+    this.conditions = trailInfo.conditionStatus;
+    this.condition_date = trailInfo.conditionDate.slice(0, 9);
+    this.condition_time = trailInfo.conditionDate.slice(11, 8);
+    //.toString().slice(12, 19);
 }
-
-
 // error handeling
 function notFoundHandler(request, response) {
     response.status(404).send('huh?');
   }
-  
   function errorHandler(error, request, response) {
     response.status(500).send(error);
   }
-  
   // Make sure the server is listening for requests
   app.listen(PORT, () => console.log(`App is listening on ${PORT}`));
