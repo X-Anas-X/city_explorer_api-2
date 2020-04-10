@@ -129,6 +129,7 @@ function trailHandler (request, response){
         // console.log('here console', trailSummery);
         response.status(200).json(trailSummery);
     })
+    
     .catch((err) => errorHandler(err, request, response));
 }
 function Trails(trailInfo){
